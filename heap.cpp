@@ -1,28 +1,27 @@
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 #pragma warning(disable:4996)
 
 struct Mesaj {
-	char* text;
+	char*text;
 	int prioritate;
 };
 
 Mesaj initMesaj(const char* text, int prioritate) {
 	Mesaj m;
-	m.prioritate = prioritate;
 	m.text = (char*)malloc(sizeof(char)*(strlen(text) + 1));
 	strcpy(m.text, text);
+	m.prioritate = prioritate;
 	return m;
 }
 
-void afisareMesaj(Mesaj m)
-{
+void afisareMesaj(Mesaj m) {
 	printf("mesajul %s \n are o prioritate de %d\n", m.text, m.prioritate);
 }
 
 struct Heap {
-	Mesaj* vector;
+	Mesaj *vector;
 	int dim;
 };
 
@@ -40,7 +39,6 @@ void filtrare(Heap heap, int pozitie) {
 	if (fiuS < heap.dim && heap.vector[max].prioritate < heap.vector[fiuS].prioritate) {
 		max = fiuS;
 	}
-
 	if (fiuD < heap.dim && heap.vector[max].prioritate < heap.vector[fiuD].prioritate) {
 		max = fiuD;
 	}
@@ -56,19 +54,18 @@ void filtrare(Heap heap, int pozitie) {
 	}
 }
 
-void inserareHeap(Heap &heap, Mesaj m) {
-	if (heap.dim > 0) {
-		Mesaj * temp = (Mesaj *)malloc(sizeof(Mesaj)*(heap.dim + 1));
+void insereareHeap(Heap &heap, Mesaj m) {
+	if (heap.dim>=0) {
+		Mesaj* temp = (Mesaj*)malloc(sizeof(Mesaj)*(heap.dim + 1));
 		for (int i = 0; i < heap.dim; i++) {
 			temp[i] = heap.vector[i];
 		}
-
 		temp[heap.dim] = m;
 		free(heap.vector);
 		heap.vector = temp;
 		heap.dim++;
 
-		for (int i = (heap.dim - 2) / 2; i >= 0; i++) {
+		for (int i = (heap.dim-2)/2; i >= 0; i--) {
 			filtrare(heap, i);
 		}
 	}
@@ -77,11 +74,10 @@ void inserareHeap(Heap &heap, Mesaj m) {
 Mesaj extragereHeap(Heap &heap) {
 	if (heap.dim > 0) {
 		Mesaj rezultat = heap.vector[0];
-		Mesaj * temp = (Mesaj*)malloc(sizeof(Mesaj)*(heap.dim - 1));
+		Mesaj* temp = (Mesaj*)malloc(sizeof(Mesaj)*(heap.dim - 1));
 		for (int i = 1; i < heap.dim; i++) {
 			temp[i - 1] = heap.vector[i];
 		}
-
 		free(heap.vector);
 		heap.vector = temp;
 		heap.dim--;
@@ -89,48 +85,30 @@ Mesaj extragereHeap(Heap &heap) {
 		for (int i = (heap.dim - 2) / 2; i >= 0; i--) {
 			filtrare(heap, i);
 		}
-
 		return rezultat;
 	}
 	else {
-		return initMesaj("", -1);
+		return initMesaj(NULL, -1);
 	}
 }
 
 void main() {
-	Heap heap;
-	heap.dim = 6;
+	Heap h;
+	h.dim = 6;
+	h.vector = (Mesaj*)malloc(sizeof(Mesaj)*h.dim);
+	h.vector[0] = initMesaj("macarena", 1);
+	h.vector[1] = initMesaj("ura", 2);
+	h.vector[2] = initMesaj("messi", 3);
+	h.vector[3] = initMesaj("mue", 4);
+	h.vector[4] = initMesaj("po", 5);
+	h.vector[5] = initMesaj("ma", 6);
 
-	heap.vector = (Mesaj*)malloc(sizeof(Mesaj)*heap.dim);
-	heap.vector[0] = initMesaj("macarena", 4);
-	heap.vector[1] = initMesaj("fara restanta", 8);
-	heap.vector[2] = initMesaj("maine", 5);
-	heap.vector[3] = initMesaj("la ora aia", 7);
-	heap.vector[4] = initMesaj("imposibil", 3);
-	heap.vector[5] = initMesaj("tom cruise", 9);
-
-	afisareHeap(heap);
-
-	for (int i = (heap.dim - 2) / 2; i >= 0; i--) {
-		filtrare(heap, i);
+	afisareHeap(h);
+	printf("\r\n");
+	for (int i = (h.dim - 2) / 2; i >= 0; i--) {
+		filtrare(h, i);
 	}
-	printf("\r\n\r\n");
-	afisareHeap(heap);
+	afisareHeap(h);
 
-
-	printf("\n***********************************\n");
-	printf("mesaj extras\n");
-	Mesaj m = extragereHeap(heap);
-	afisareMesaj(m);
-	free(m.text);
-
-	printf("\r\n\r\n");
-	afisareHeap(heap);
-
-	inserareHeap(heap, initMesaj("bv boss", 12));
-
-
-	printf("\r\n\r\n");
-	afisareHeap(heap);
 
 }

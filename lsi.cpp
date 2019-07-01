@@ -1,61 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#pragma warning(disable:4996)
 
-struct nod {
-	televizor info; //informatia utila
-	nod* next; //ma intereseaza urmatoarea adresa
+
+//lsi
+
+struct Fruct {
+	char* denumire;
+	int pret;
 };
 
-//returneaza un nod nou
-//vom returna adresa acestui nou nod (in sine)
-nod * creareNod(televizor t, nod* urmator) {   
-	nod* nodNou;
-	nodNou = (nod*)malloc(sizeof(nod)); //aloc spatiu pentru un nod nou
-	nodNou->info = t; //shallow copy daca lasam doar nodNou->info = t; practic o copiere de adrese
-	//deep-copy ca avem marca de tip char pointer care trebuie alocat
-	//pentru primitive nu se face shallow-copy, ci se face direct
-	nodNou->info.marca = (char*)malloc(sizeof(char)*((strlen(t.marca) + 1)));
-	strcpy(nodNou->info.marca, t.marca);
-	nodNou->next = urmator;
-	return nodNou;
+struct nod {
+	Fruct info;
+	nod* next;
+};
+
+Fruct initFruct(const char* denumire, int pret) {
+	Fruct f;
+	f.denumire = (char*)malloc(sizeof(char)*(strlen(denumire) + 1));
+	strcpy(f.denumire, denumire);
+	f.pret = pret;
+	return f;
 }
 
-void afisareLista(nod* cap) { //primim adresa primului nod din lista
-	while (cap) { //atata timp cat avem noduri in lista; atata timp cand nu este null
-		afisareTelevizor(cap->info);
-		cap = cap->next;
-	}
+void afisareFruct(Fruct f) {
+	printf("fructul %s costa %d", f.denumire, f.pret);
 }
 
-nod* stergereLista(nod* cap) { //primim adresa primului nod din lista
-	while (cap) {
-		free(cap->info.marca);
-		//daca ma mut, nu mai am acces la precedentul
-		nod* temp = cap; //au aceeasi adresa
-		cap = cap->next;
-		free(temp);
-	}
-	return NULL; //si cap o sa fie tot nul
+nod* creeareNod(Fruct f, nod* urm) {
+	nod* nou = (nod*)malloc(sizeof(nod));
+	nou->info = initFruct(f.denumire, f.pret);
+	nou->next = urm;
+	return nou;	 
 }
 
-//tot nod*, adresa primului nod din lista
-//cazul in care se modifica si primul: cand lista este goala (null), va trebui schimbata cu adresa nodul pe care l inserez 
-nod* inserareSfarsit(nod* cap, televizor t) {
-	//verificam daca avem sau nu lista
+nod* adaugareFinal(Fruct f, nod* cap) {
 	if (cap) {
-		//avem o lista
-		//mergem la ultimul nod
-		nod* p = cap;
-		//p->next pentru ca vreau sa ies inainte de a se termina lista
-		while (p->next) {
-			//daca urmatorul nod nu exista nu merg
-			//deci ma opresc pe ultimul nod "valid"
-			p = p->next;
+		nod* temp = cap;
+		while (temp->next) {
+			temp = temp->next;
 		}
-		//ii salvez noua adresa a noudului in p->next
-		p->next = creareNod(t, NULL);
-		return cap; //ii returnez adresa primului nod
+		temp->next = creeareNod(f, NULL);
+		return cap;
 	}
 	else {
-		//nu avem lista
-		return creareNod(t, NULL);
+		return creeareNod(f, NULL);
 	}
+}
+
+nod* stergereLista(nod* cap) {
+	while (cap) {
+		free(cap->info.denumire);
+		nod* temp = cap;
+		free(temp);
+		cap = cap->next;
+	}
+	return NULL;
+}
+
+void afisareLSI(nod* cap) {
+	while (cap) {
+		afisareFruct(cap->info);
+		printf("\n");
+		cap = cap->next;
+	}
+}
+
+
+
+void main() {
+	nod* lista = NULL;
+
+	lista = creeareNod(initFruct("banana", 30), lista);
+	lista = creeareNod(initFruct("mar", 90), lista);
+	lista = creeareNod(initFruct("para", 10), lista);
+	afisareLSI(lista);
+
+
+	printf("\n******************\n");
+	nod* lista2 = NULL;
+	lista2 = adaugareFinal(initFruct("banana", 30), lista2);
+	lista2 = adaugareFinal(initFruct("mar", 10), lista2);
+	lista2 = adaugareFinal(initFruct("par", 22), lista2);
+	afisareLSI(lista2);
+
+
 }
